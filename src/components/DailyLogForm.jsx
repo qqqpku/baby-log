@@ -181,7 +181,7 @@ export default function DailyLogForm({ onSave, onUpdate, lastLog, editingLog, on
         const statsSummary = `总母乳: ${totalBreast}分钟, 总米粉: ${totalFormula}勺, 总睡眠: ${totalSleep}`
         // Always use trimmed user notes (no old stats) and append fresh stats
         const userNotes = formData.summary ? formData.summary.trim() : ''
-        const finalSummary = userNotes ? `${userNotes}\n(${statsSummary})` : statsSummary
+        const finalSummary = userNotes ? `${userNotes}\n(${statsSummary})` : `(${statsSummary})`
 
         if (editingLog) {
             // Update existing log
