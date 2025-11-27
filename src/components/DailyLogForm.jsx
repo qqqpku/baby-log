@@ -115,7 +115,18 @@ export default function DailyLogForm({ onSave, onUpdate, lastLog, editingLog, on
     // Load editing log data when editingLog changes
     useEffect(() => {
         if (editingLog) {
-            setFormData(editingLog)
+            // Separate user notes from auto-generated summary
+            const loadedData = { ...editingLog }
+            if (loadedData.summary) {
+                // Extract user notes (everything before the stats line)
+                // Stats line format: "\n(总母乳: ..." or just "(总母乳: ..." if no user notes
+                const statsPattern = /\n?\(总母乳:/
+                const match = loadedData.summary.match(statsPattern)
+                if (match) {
+                    loadedData.summary = loadedData.summary.substring(0, match.index)
+                }
+            }
+            setFormData(loadedData)
         }
     }, [editingLog])
 
@@ -168,7 +179,9 @@ export default function DailyLogForm({ onSave, onUpdate, lastLog, editingLog, on
         const totalFormula = formData.feedings?.reduce((acc, curr) => acc + (Number(curr.formula) || 0), 0) || 0
 
         const statsSummary = `总母乳: ${totalBreast}分钟, 总配方奶: ${totalFormula}ml, 总睡眠: ${totalSleep}`
-        const finalSummary = formData.summary ? `${formData.summary}\n(${statsSummary})` : statsSummary
+        // Always use trimmed user notes (no old stats) and append fresh stats
+        const userNotes = formData.summary ? formData.summary.trim() : ''
+        const finalSummary = userNotes ? `${userNotes}\n(${statsSummary})` : statsSummary
 
         if (editingLog) {
             // Update existing log
