@@ -63,7 +63,7 @@ export default function LogHistory({ logs, onDelete, onEdit }) {
                                                 {f.time} -
                                                 {f.breastL && ` 左:${f.breastL}分`}
                                                 {f.breastR && ` 右:${f.breastR}分`}
-                                                {f.formula && ` ${f.formula}ml`}
+                                                {f.formula && ` ${f.formula}勺`}
                                                 {f.solidsFood && ` (${f.solidsFood})`}
                                             </li>
                                         ))}

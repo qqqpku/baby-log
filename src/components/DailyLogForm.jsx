@@ -178,7 +178,7 @@ export default function DailyLogForm({ onSave, onUpdate, lastLog, editingLog, on
         const totalBreast = formData.feedings?.reduce((acc, curr) => acc + (Number(curr.breastL) || 0) + (Number(curr.breastR) || 0), 0) || 0
         const totalFormula = formData.feedings?.reduce((acc, curr) => acc + (Number(curr.formula) || 0), 0) || 0
 
-        const statsSummary = `总母乳: ${totalBreast}分钟, 总配方奶: ${totalFormula}ml, 总睡眠: ${totalSleep}`
+        const statsSummary = `总母乳: ${totalBreast}分钟, 总米粉: ${totalFormula}勺, 总睡眠: ${totalSleep}`
         // Always use trimmed user notes (no old stats) and append fresh stats
         const userNotes = formData.summary ? formData.summary.trim() : ''
         const finalSummary = userNotes ? `${userNotes}\n(${statsSummary})` : statsSummary
@@ -267,7 +267,7 @@ export default function DailyLogForm({ onSave, onUpdate, lastLog, editingLog, on
                             <tr style={{ textAlign: 'left', fontSize: '0.85rem', color: 'var(--color-text-sub)' }}>
                                 <th style={{ padding: '0.5rem' }}>时间</th>
                                 <th style={{ padding: '0.5rem' }}>母乳 (左/右 分钟)</th>
-                                <th style={{ padding: '0.5rem' }}>配方奶 (ml)</th>
+                                <th style={{ padding: '0.5rem' }}>米粉 (勺)</th>
                                 <th style={{ padding: '0.5rem' }}>辅食</th>
                             </tr>
                         </thead>
@@ -493,7 +493,7 @@ export default function DailyLogForm({ onSave, onUpdate, lastLog, editingLog, on
                         </div>
                     </div>
                     <div>
-                        <div className="label">总配方奶 (ml)</div>
+                        <div className="label">总米粉 (勺)</div>
                         <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--color-secondary)' }}>
                             {formData.feedings?.reduce((acc, curr) => acc + (Number(curr.formula) || 0), 0) || 0}
                         </div>
