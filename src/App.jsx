@@ -3,7 +3,7 @@ import DailyLogForm from './components/DailyLogForm'
 import LogHistory from './components/LogHistory'
 import { normalizeLog } from './utils/schema'
 
-import { getLogs, saveLog as saveLogToDb, deleteLog as deleteLogFromDb, importLogs } from './services/db'
+import { getLogs, saveLog as saveLogToDb, deleteLog as deleteLogFromDb, importLogs } from './services/storage'
 import { exportDataAsJSON, generateExportFilename } from './utils/export'
 
 function App() {
