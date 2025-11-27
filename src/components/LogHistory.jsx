@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export default function LogHistory({ logs, onDelete }) {
+export default function LogHistory({ logs, onDelete, onEdit }) {
     const [expandedId, setExpandedId] = useState(null)
 
     const toggleExpand = (id) => {
@@ -89,8 +89,25 @@ export default function LogHistory({ logs, onDelete }) {
                                     </ul>
                                 </div>
                             )}
-                            {/* Delete Button */}
-                            <div style={{ marginTop: '1.5rem', textAlign: 'right', borderTop: '1px solid var(--color-border)', paddingTop: '1rem' }}>
+                            {/* Action Buttons */}
+                            <div style={{ marginTop: '1.5rem', display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', borderTop: '1px solid var(--color-border)', paddingTop: '1rem' }}>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onEdit(log);
+                                    }}
+                                    style={{
+                                        background: 'none',
+                                        border: '1px solid #1890ff',
+                                        color: '#1890ff',
+                                        padding: '0.5rem 1rem',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.9rem'
+                                    }}
+                                >
+                                    ✏️ 编辑
+                                </button>
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();

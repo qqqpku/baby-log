@@ -9,6 +9,7 @@ import { exportDataAsJSON, generateExportFilename } from './utils/export'
 function App() {
   const [view, setView] = useState('form') // 'form' or 'history'
   const [logs, setLogs] = useState([])
+  const [editingLog, setEditingLog] = useState(null)
 
   useEffect(() => {
     loadLogs()
@@ -31,6 +32,22 @@ function App() {
     } catch (err) {
       console.error('Failed to save log:', err)
     }
+  }
+
+  const updateLog = async (updatedLog) => {
+    try {
+      await saveLogToDb(updatedLog)
+      await loadLogs()
+      setEditingLog(null)
+      setView('history')
+    } catch (err) {
+      console.error('Failed to update log:', err)
+    }
+  }
+
+  const handleEdit = (log) => {
+    setEditingLog(log)
+    setView('form')
   }
 
   const deleteLog = async (id) => {
@@ -98,9 +115,15 @@ function App() {
 
       <main className="container">
         {view === 'form' ? (
-          <DailyLogForm onSave={saveLog} lastLog={logs[0]} />
+          <DailyLogForm
+            onSave={saveLog}
+            onUpdate={updateLog}
+            lastLog={logs[0]}
+            editingLog={editingLog}
+            onCancelEdit={() => setEditingLog(null)}
+          />
         ) : (
-          <LogHistory logs={logs} onDelete={deleteLog} />
+          <LogHistory logs={logs} onDelete={deleteLog} onEdit={handleEdit} />
         )}
       </main>
     </div>

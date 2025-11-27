@@ -72,7 +72,7 @@ const TRANSLATIONS = {
     language: { pronounce: '发音练习', understand: '语言理解', interact: '互动交流' }
 }
 
-export default function DailyLogForm({ onSave, lastLog }) {
+export default function DailyLogForm({ onSave, onUpdate, lastLog, editingLog, onCancelEdit }) {
     const [formData, setFormData] = useState(() => {
         try {
             const initialData = JSON.parse(JSON.stringify(DEFAULT_LOG_SCHEMA))
@@ -111,6 +111,13 @@ export default function DailyLogForm({ onSave, lastLog }) {
         const today = new Date().toISOString().split('T')[0]
         setFormData(prev => ({ ...prev, date: today }))
     }, [])
+
+    // Load editing log data when editingLog changes
+    useEffect(() => {
+        if (editingLog) {
+            setFormData(editingLog)
+        }
+    }, [editingLog])
 
     const handleChange = (section, field, value, index = null, subField = null) => {
         setFormData(prev => {
@@ -163,15 +170,22 @@ export default function DailyLogForm({ onSave, lastLog }) {
         const statsSummary = `总母乳: ${totalBreast}分钟, 总配方奶: ${totalFormula}ml, 总睡眠: ${totalSleep}`
         const finalSummary = formData.summary ? `${formData.summary}\n(${statsSummary})` : statsSummary
 
-        // Generate a safe ID (crypto.randomUUID only works in secure contexts)
-        const safeId = Date.now().toString(36) + Math.random().toString(36).substr(2)
-
-        onSave({
-            ...formData,
-            summary: finalSummary,
-            id: safeId,
-            createdAt: new Date().toISOString()
-        })
+        if (editingLog) {
+            // Update existing log
+            onUpdate({
+                ...formData,
+                summary: finalSummary
+            })
+        } else {
+            // Create new log
+            const safeId = Date.now().toString(36) + Math.random().toString(36).substr(2)
+            onSave({
+                ...formData,
+                summary: finalSummary,
+                id: safeId,
+                createdAt: new Date().toISOString()
+            })
+        }
     }
 
     if (!formData) return <div>Loading...</div>
@@ -501,9 +515,21 @@ export default function DailyLogForm({ onSave, lastLog }) {
                     />
                 </div>
             </div>
-            <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }}>
-                保存记录
-            </button>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1, padding: '1rem', fontSize: '1.1rem' }}>
+                    {editingLog ? '更新记录' : '保存记录'}
+                </button>
+                {editingLog && (
+                    <button
+                        type="button"
+                        className="btn btn-secondary"
+                        style={{ padding: '1rem', fontSize: '1.1rem' }}
+                        onClick={onCancelEdit}
+                    >
+                        取消
+                    </button>
+                )}
+            </div>
         </form>
     )
 }
