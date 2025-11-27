@@ -29,3 +29,15 @@ export const deleteLog = async (id) => {
     const db = await dbPromise
     await db.delete(STORE_NAME, id)
 }
+
+export const importLogs = async (logs) => {
+    const db = await dbPromise
+    const tx = db.transaction(STORE_NAME, 'readwrite')
+    const store = tx.objectStore(STORE_NAME)
+
+    for (const log of logs) {
+        await store.put(log)
+    }
+
+    await tx.done
+}

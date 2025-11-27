@@ -1,15 +1,16 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import DailyLogForm from './components/DailyLogForm'
 import LogHistory from './components/LogHistory'
 import { normalizeLog } from './utils/schema'
 
-import { getLogs, saveLog as saveLogToDb, deleteLog as deleteLogFromDb } from './services/db'
+import { getLogs, saveLog as saveLogToDb, deleteLog as deleteLogFromDb, importLogs } from './services/db'
 import { exportDataAsJSON, generateExportFilename } from './utils/export'
 
 function App() {
   const [view, setView] = useState('form') // 'form' or 'history'
   const [logs, setLogs] = useState([])
   const [editingLog, setEditingLog] = useState(null)
+  const fileInputRef = React.useRef(null)
 
   useEffect(() => {
     loadLogs()
@@ -73,6 +74,37 @@ function App() {
     }
   }
 
+  const handleImportClick = () => {
+    fileInputRef.current.click()
+  }
+
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = async (e) => {
+      try {
+        const importedData = JSON.parse(e.target.result)
+        if (!Array.isArray(importedData)) {
+          throw new Error('Invalid data format')
+        }
+
+        if (confirm(`准备导入 ${importedData.length} 条记录，这可能会覆盖现有的同名记录。确定继续吗？`)) {
+          await importLogs(importedData)
+          await loadLogs()
+          alert('导入成功！')
+        }
+      } catch (err) {
+        console.error('Import failed:', err)
+        alert('导入失败：文件格式不正确')
+      }
+      // Reset file input
+      event.target.value = ''
+    }
+    reader.readAsText(file)
+  }
+
   return (
     <div className="app-container">
       <header style={{
@@ -110,6 +142,20 @@ function App() {
           >
             📥 导出
           </button>
+          <button
+            className="btn btn-secondary"
+            onClick={handleImportClick}
+            title="从JSON文件导入数据"
+          >
+            📤 导入
+          </button>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            style={{ display: 'none' }}
+            accept=".json"
+          />
         </nav>
       </header>
 
