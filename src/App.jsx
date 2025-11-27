@@ -38,7 +38,7 @@ function App() {
 
     try {
       await deleteLogFromDb(id)
-      setLogs(logs.filter(log => log.id !== id))
+      setLogs(prevLogs => prevLogs.filter(log => log.id !== id))
     } catch (err) {
       console.error('Failed to delete log:', err)
     }
