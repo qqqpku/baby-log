@@ -13,6 +13,7 @@ function App() {
   const [view, setView] = useState('form') // 'form' or 'history'
   const [logs, setLogs] = useState([])
   const [editingLog, setEditingLog] = useState(null)
+  const [showMenu, setShowMenu] = useState(false)
   const fileInputRef = React.useRef(null)
 
   const handleLoginSuccess = () => {
@@ -156,27 +157,87 @@ function App() {
           >
             历史记录
           </button>
-          <button
-            className="btn btn-secondary"
-            onClick={handleExport}
-            title="导出所有数据为JSON文件"
-          >
-            📥 导出
-          </button>
-          <button
-            className="btn btn-secondary"
-            onClick={handleImportClick}
-            title="从JSON文件导入数据"
-          >
-            📤 导入
-          </button>
-          <button
-            className="btn btn-secondary"
-            onClick={handleLogout}
-            title="退出登录"
-          >
-            🚪 退出
-          </button>
+          <div style={{ position: 'relative' }}>
+            <button
+              className="btn btn-secondary"
+              onClick={() => setShowMenu(!showMenu)}
+              title="更多选项"
+            >
+              ⚙️ 更多
+            </button>
+            {showMenu && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                right: 0,
+                marginTop: '0.5rem',
+                background: 'white',
+                borderRadius: '8px',
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                border: '1px solid #e2e8f0',
+                minWidth: '120px',
+                zIndex: 20,
+                overflow: 'hidden'
+              }}>
+                <button
+                  onClick={() => { handleExport(); setShowMenu(false) }}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    textAlign: 'left',
+                    background: 'none',
+                    border: 'none',
+                    borderBottom: '1px solid #edf2f7',
+                    cursor: 'pointer',
+                    color: '#4a5568',
+                    fontSize: '0.9rem'
+                  }}
+                  onMouseEnter={(e) => e.target.style.background = '#f7fafc'}
+                  onMouseLeave={(e) => e.target.style.background = 'none'}
+                >
+                  📥 导出数据
+                </button>
+                <button
+                  onClick={() => { handleImportClick(); setShowMenu(false) }}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    textAlign: 'left',
+                    background: 'none',
+                    border: 'none',
+                    borderBottom: '1px solid #edf2f7',
+                    cursor: 'pointer',
+                    color: '#4a5568',
+                    fontSize: '0.9rem'
+                  }}
+                  onMouseEnter={(e) => e.target.style.background = '#f7fafc'}
+                  onMouseLeave={(e) => e.target.style.background = 'none'}
+                >
+                  📤 导入数据
+                </button>
+                <button
+                  onClick={() => { handleLogout(); setShowMenu(false) }}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    textAlign: 'left',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: '#e53e3e',
+                    fontSize: '0.9rem'
+                  }}
+                  onMouseEnter={(e) => e.target.style.background = '#fff5f5'}
+                  onMouseLeave={(e) => e.target.style.background = 'none'}
+                >
+                  🚪 退出登录
+                </button>
+              </div>
+            )}
+          </div>
           <input
             type="file"
             ref={fileInputRef}
