@@ -114,7 +114,7 @@ function App() {
         }
       } catch (err) {
         console.error('Import failed:', err)
-        alert('导入失败：文件格式不正确')
+        alert(`导入失败：${err.message}`)
       }
       // Reset file input
       event.target.value = ''

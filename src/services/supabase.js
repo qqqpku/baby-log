@@ -83,8 +83,7 @@ export const importLogs = async (logs) => {
         const newId = Date.now().toString(36) + Math.random().toString(36).substr(2)
 
         return {
-            ...log, // Keep original content
-            id: newId, // New ID
+            id: newId,
             date: log.date,
             content: { ...log, id: newId }, // Update ID inside content too
             user_id: userId,
