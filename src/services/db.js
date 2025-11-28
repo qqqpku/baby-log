@@ -36,7 +36,10 @@ export const importLogs = async (logs) => {
     const store = tx.objectStore(STORE_NAME)
 
     for (const log of logs) {
-        await store.put(log)
+        // Generate new ID to avoid conflicts and ensure it's treated as a new copy
+        const newId = Date.now().toString(36) + Math.random().toString(36).substr(2)
+        const newLog = { ...log, id: newId }
+        await store.put(newLog)
     }
 
     await tx.done

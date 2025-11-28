@@ -1,20 +1,37 @@
 import React, { useState, useEffect } from 'react'
 import DailyLogForm from './components/DailyLogForm'
 import LogHistory from './components/LogHistory'
+import Login from './components/Login'
 import { normalizeLog } from './utils/schema'
+import { isAuthenticated, logout } from './services/auth'
 
 import { getLogs, saveLog as saveLogToDb, deleteLog as deleteLogFromDb, importLogs } from './services/storage'
 import { exportDataAsJSON, generateExportFilename } from './utils/export'
 
 function App() {
+  const [authenticated, setAuthenticated] = useState(isAuthenticated())
   const [view, setView] = useState('form') // 'form' or 'history'
   const [logs, setLogs] = useState([])
   const [editingLog, setEditingLog] = useState(null)
   const fileInputRef = React.useRef(null)
 
+  const handleLoginSuccess = () => {
+    setAuthenticated(true)
+  }
+
+  const handleLogout = () => {
+    if (confirm('确定要退出登录吗？')) {
+      logout()
+      setAuthenticated(false)
+      setLogs([])
+    }
+  }
+
   useEffect(() => {
-    loadLogs()
-  }, [])
+    if (authenticated) {
+      loadLogs()
+    }
+  }, [authenticated])
 
   const loadLogs = async () => {
     try {
@@ -27,8 +44,8 @@ function App() {
 
   const saveLog = async (newLog) => {
     try {
-      const savedLog = await saveLogToDb(newLog)
-      setLogs([savedLog, ...logs])
+      await saveLogToDb(newLog)
+      await loadLogs()
       setView('history')
     } catch (err) {
       console.error('Failed to save log:', err)
@@ -105,6 +122,10 @@ function App() {
     reader.readAsText(file)
   }
 
+  if (!authenticated) {
+    return <Login onLoginSuccess={handleLoginSuccess} />
+  }
+
   return (
     <div className="app-container">
       <header style={{
@@ -148,6 +169,13 @@ function App() {
             title="从JSON文件导入数据"
           >
             📤 导入
+          </button>
+          <button
+            className="btn btn-secondary"
+            onClick={handleLogout}
+            title="退出登录"
+          >
+            🚪 退出
           </button>
           <input
             type="file"

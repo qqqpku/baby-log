@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { getUserId } from './auth'
 
 // These will be populated from environment variables
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
@@ -10,9 +11,13 @@ export const supabase = createClient(supabaseUrl, supabaseKey)
 const TABLE_NAME = 'logs'
 
 export const getLogs = async () => {
+    const userId = getUserId()
+    if (!userId) throw new Error('Not authenticated')
+
     const { data, error } = await supabase
         .from(TABLE_NAME)
         .select('*')
+        .eq('user_id', userId)
         .order('date', { ascending: false })
 
     if (error) {
@@ -20,25 +25,21 @@ export const getLogs = async () => {
         throw error
     }
 
-    // Transform back to our app's format if needed
-    // Our app expects the full log object. 
-    // We will store the full JSON in a 'content' column, 
-    // but for easier querying we might also have 'date' as a column.
-    // Let's assume we store: id, date, content (jsonb)
-
     return data.map(row => ({
         ...row.content,
-        id: row.id // Ensure ID matches
+        id: row.id
     }))
 }
 
 export const saveLog = async (log) => {
-    // We store the full log object in 'content' column
-    // and extract 'date' for sorting/querying
+    const userId = getUserId()
+    if (!userId) throw new Error('Not authenticated')
+
     const row = {
         id: log.id,
         date: log.date,
         content: log,
+        user_id: userId,
         updated_at: new Date().toISOString()
     }
 
@@ -49,6 +50,7 @@ export const saveLog = async (log) => {
 
     if (error) {
         console.error('Error saving log:', error)
+        console.error('Error details:', JSON.stringify(error, null, 2))
         throw error
     }
 
@@ -56,10 +58,14 @@ export const saveLog = async (log) => {
 }
 
 export const deleteLog = async (id) => {
+    const userId = getUserId()
+    if (!userId) throw new Error('Not authenticated')
+
     const { error } = await supabase
         .from(TABLE_NAME)
         .delete()
         .eq('id', id)
+        .eq('user_id', userId)
 
     if (error) {
         console.error('Error deleting log:', error)
@@ -68,13 +74,23 @@ export const deleteLog = async (id) => {
 }
 
 export const importLogs = async (logs) => {
-    // Bulk insert/upsert
-    const rows = logs.map(log => ({
-        id: log.id,
-        date: log.date,
-        content: log,
-        updated_at: new Date().toISOString()
-    }))
+    const userId = getUserId()
+    if (!userId) throw new Error('Not authenticated')
+
+    const rows = logs.map(log => {
+        // Generate a new ID to prevent overwriting existing records (ownership transfer)
+        // This creates a copy of the data for the current user
+        const newId = Date.now().toString(36) + Math.random().toString(36).substr(2)
+
+        return {
+            ...log, // Keep original content
+            id: newId, // New ID
+            date: log.date,
+            content: { ...log, id: newId }, // Update ID inside content too
+            user_id: userId,
+            updated_at: new Date().toISOString()
+        }
+    })
 
     const { error } = await supabase
         .from(TABLE_NAME)
