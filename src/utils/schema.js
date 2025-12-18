@@ -13,6 +13,7 @@ export const DEFAULT_LOG_SCHEMA = {
         time: '',
         breastL: '',
         breastR: '',
+        breastMl: '',
         formula: '',
         solidsTime: '',
         solidsFood: ''

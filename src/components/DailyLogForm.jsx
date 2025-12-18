@@ -15,6 +15,7 @@ const DEFAULT_LOG_SCHEMA = {
         time: '',
         breastL: '',
         breastR: '',
+        breastMl: '',
         formula: '',
         solidsTime: '',
         solidsFood: ''
@@ -176,9 +177,14 @@ export default function DailyLogForm({ onSave, onUpdate, lastLog, editingLog, on
 
         // Calculate totals for summary
         const totalBreast = formData.feedings?.reduce((acc, curr) => acc + (Number(curr.breastL) || 0) + (Number(curr.breastR) || 0), 0) || 0
+        const totalBreastMl = formData.feedings?.reduce((acc, curr) => acc + (Number(curr.breastMl) || 0), 0) || 0
         const totalFormula = formData.feedings?.reduce((acc, curr) => acc + (Number(curr.formula) || 0), 0) || 0
 
-        const statsSummary = `总母乳: ${totalBreast}分钟, 总米粉: ${totalFormula}勺, 总睡眠: ${totalSleep}`
+        let statsSummary = ''
+        if (totalBreast > 0) statsSummary += `总母乳: ${totalBreast}分钟, `
+        if (totalBreastMl > 0) statsSummary += `总瓶喂: ${totalBreastMl}ml, `
+
+        statsSummary += `总米粉: ${totalFormula}勺, 总睡眠: ${totalSleep}`
         // Always use trimmed user notes (no old stats) and append fresh stats
         const userNotes = formData.summary ? formData.summary.trim() : ''
         const finalSummary = userNotes ? `${userNotes}\n(${statsSummary})` : `(${statsSummary})`
@@ -266,7 +272,7 @@ export default function DailyLogForm({ onSave, onUpdate, lastLog, editingLog, on
                         <thead>
                             <tr style={{ textAlign: 'left', fontSize: '0.85rem', color: 'var(--color-text-sub)' }}>
                                 <th style={{ padding: '0.5rem' }}>时间</th>
-                                <th style={{ padding: '0.5rem' }}>母乳 (左/右 分钟)</th>
+                                <th style={{ padding: '0.5rem' }}>母乳 (ml)</th>
                                 <th style={{ padding: '0.5rem' }}>米粉 (勺)</th>
                                 <th style={{ padding: '0.5rem' }}>辅食</th>
                             </tr>
@@ -284,16 +290,23 @@ export default function DailyLogForm({ onSave, onUpdate, lastLog, editingLog, on
                                         />
                                     </td>
                                     <td style={{ padding: '0.5rem' }}>
-                                        <div style={{ display: 'flex', gap: '4px' }}>
+                                        {(row.breastL || row.breastR) ? (
+                                            <div style={{ display: 'flex', gap: '4px' }}>
+                                                <input
+                                                    type="number" className="input" placeholder="左" style={{ padding: '0.25rem' }}
+                                                    value={row.breastL || ''} onChange={e => handleChange('feedings', 'breastL', e.target.value, i)}
+                                                />
+                                                <input
+                                                    type="number" className="input" placeholder="右" style={{ padding: '0.25rem' }}
+                                                    value={row.breastR || ''} onChange={e => handleChange('feedings', 'breastR', e.target.value, i)}
+                                                />
+                                            </div>
+                                        ) : (
                                             <input
-                                                type="number" className="input" placeholder="左" style={{ padding: '0.25rem' }}
-                                                value={row.breastL || ''} onChange={e => handleChange('feedings', 'breastL', e.target.value, i)}
+                                                type="number" className="input" placeholder="瓶喂(ml)" style={{ padding: '0.25rem' }}
+                                                value={row.breastMl || ''} onChange={e => handleChange('feedings', 'breastMl', e.target.value, i)}
                                             />
-                                            <input
-                                                type="number" className="input" placeholder="右" style={{ padding: '0.25rem' }}
-                                                value={row.breastR || ''} onChange={e => handleChange('feedings', 'breastR', e.target.value, i)}
-                                            />
-                                        </div>
+                                        )}
                                     </td>
                                     <td style={{ padding: '0.5rem' }}>
                                         <input
@@ -487,9 +500,15 @@ export default function DailyLogForm({ onSave, onUpdate, lastLog, editingLog, on
 
                 <div className="grid-2" style={{ marginBottom: '1rem', background: 'var(--color-bg)', padding: '0.5rem', borderRadius: 'var(--radius-md)' }}>
                     <div>
-                        <div className="label">总母乳 (分钟)</div>
+                        <div className="label">总母乳 {formData.feedings?.reduce((acc, curr) => acc + (Number(curr.breastMl) || 0), 0) > 0 ? '(ml)' : '(分钟)'}</div>
                         <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--color-primary-dark)' }}>
-                            {formData.feedings?.reduce((acc, curr) => acc + (Number(curr.breastL) || 0) + (Number(curr.breastR) || 0), 0) || 0}
+                            {formData.feedings?.reduce((acc, curr) => acc + (Number(curr.breastMl) || 0), 0) > 0
+                                ? formData.feedings?.reduce((acc, curr) => acc + (Number(curr.breastMl) || 0), 0)
+                                : formData.feedings?.reduce((acc, curr) => acc + (Number(curr.breastL) || 0) + (Number(curr.breastR) || 0), 0)
+                            }
+                            {formData.feedings?.reduce((acc, curr) => acc + (Number(curr.breastMl) || 0), 0) > 0 && formData.feedings?.reduce((acc, curr) => acc + (Number(curr.breastL) || 0) + (Number(curr.breastR) || 0), 0) > 0 && (
+                                <span style={{ fontSize: '0.8rem', fontWeight: 'normal' }}> (+{formData.feedings?.reduce((acc, curr) => acc + (Number(curr.breastL) || 0) + (Number(curr.breastR) || 0), 0)}分)</span>
+                            )}
                         </div>
                     </div>
                     <div>

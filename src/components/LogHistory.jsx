@@ -61,8 +61,10 @@ export default function LogHistory({ logs, onDelete, onEdit }) {
                                         {(log.feedings || []).filter(f => f.time).map((f, i) => (
                                             <li key={i}>
                                                 {f.time} -
-                                                {f.breastL && ` 左:${f.breastL}分`}
-                                                {f.breastR && ` 右:${f.breastR}分`}
+                                                {f.breastMl ? ` 母乳:${f.breastMl}ml` : <>
+                                                    {f.breastL && ` 左:${f.breastL}分`}
+                                                    {f.breastR && ` 右:${f.breastR}分`}
+                                                </>}
                                                 {f.formula && ` ${f.formula}勺`}
                                                 {f.solidsFood && ` (${f.solidsFood})`}
                                             </li>
